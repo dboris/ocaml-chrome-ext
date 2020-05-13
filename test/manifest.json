@@ -4,6 +4,13 @@
     "description": "Test Chrome Extensions API binding.",
     "manifest_version": 2,
 
+    "permissions": [
+        "*://*/*",
+        "activeTab",
+        "contextMenus",
+        "storage"
+    ],
+
     "background": {
         "scripts": ["background.bc.js"],
         "persistent": false

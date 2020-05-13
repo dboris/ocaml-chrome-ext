@@ -1,88 +1,53 @@
 open Core_types
 
-[@@@js.implem
-    exception Chrome_runtime_error of string
-]
-
 type error = { message : string option }
 
 val last_error : error option
 [@@js.global "chrome.runtime.lastError"]
 
-type send_message_options
+val wrap_callback : (?callback:('a -> unit) -> unit -> unit) -> 'a Lwt.t
+[@@js.custom
+    let wrap_callback f =
+        let (p, r) = Lwt.wait () in
+        let callback response =
+            if Option.is_some last_error then
+                let error_message =
+                    last_error
+                    |> Option.get
+                    |> (fun {message} -> message |> Option.value ~default:"No message")
+                in
+                Lwt.wakeup_exn r (Chrome_runtime_error error_message)
+            else
+                Lwt.wakeup r response
+        in
+        let () = f ?callback:(Some callback) () in
+        p
+]
 
-val send_message_options :
-    ?includeTlsChannelId:bool ->
-    unit ->
-    send_message_options
+type send_message_opts
+
+val send_message_opts : ?includeTlsChannelId:bool -> unit -> send_message_opts
 [@@js.builder]
-
-type extension_id = string
 
 val send_message' :
     ?extension_id:extension_id ->
     Ojs.t ->
-    options:send_message_options option ->
-    callback:(Ojs.t -> unit) option ->
+    ?options:send_message_opts ->
+    ?callback:(Ojs.t -> unit) ->
+    unit ->
     unit
 [@@js.global "chrome.runtime.sendMessage"]
 
 val send_message :
     ?extension_id:extension_id ->
     Ojs.t ->
+    ?options:send_message_opts ->
+    unit ->
     Ojs.t Lwt.t
 [@@js.custom
-    let send_message ?extension_id msg =
-        let (r, w) = Lwt.task () in
-        let callback response =
-            if Ojs.is_null response then
-                if Option.is_some last_error then
-                    let message =
-                        Option.get last_error
-                        |> (fun err ->
-                            Option.fold ~none:"No message" ~some:(fun m -> m) err.message)
-                    in
-                    Lwt.wakeup_exn w (Chrome_runtime_error message)
-                else
-                    Lwt.wakeup w Ojs.null
-            else
-                Lwt.wakeup w response
-        in
-        send_message' ?extension_id msg ~options:None ~callback:(Some callback);
-        r
+    let send_message ?extension_id msg ?options () =
+        wrap_callback (send_message' ?extension_id msg ?options)
 ]
-
-module Tab : sig
-    type id = int
-
-    val id_to_js : id -> Ojs.t
-
-    type t =
-      { active : bool
-      ; audible : bool option
-      ; autoDiscardable : bool
-      ; discarded : bool
-      ; favIconUrl : string option
-      ; height : int option
-      ; highlighted : bool
-      ; id : id option
-      ; incognito : bool
-      ; index : int
-      ; mutedInfo : muted_info option
-      ; openerTabId : int option
-      ; pendingUrl : string option
-      ; pinned : bool
-      ; sessionId : string option
-      ; status : tab_status option
-      ; title : string option
-      ; url : string option
-      ; width : int option
-      ; windowId : Window.id
-      }
-
-    val t_of_js : Ojs.t -> t
-    val t_to_js : t -> Ojs.t
-end
 
 type message_sender =
   { tab : Tab.t option
@@ -94,7 +59,17 @@ type message_sender =
   ; origin : string option
   }
 
-type message_listener = Ojs.t -> message_sender -> ?send_response:(Ojs.t -> unit) -> unit -> unit
+type message_listener_response = [`Sync_or_no_response | `Async_response of bool] [@js.union]
+
+val message_listener_response_of_js : Ojs.t -> message_listener_response
+[@@js.custom
+    let message_listener_response_of_js v =
+        if Ojs.is_null v then `Sync_or_no_response else `Async_response (Ojs.bool_of_js v)
+]
+
+val message_listener_response_to_js : message_listener_response -> Ojs.t
+
+type message_listener = Ojs.t -> message_sender -> (Ojs.t -> unit) -> message_listener_response
 
 type message_event =
   { add_listener : message_listener -> unit
@@ -102,5 +77,22 @@ type message_event =
   ; has_listener : message_listener -> bool
   }
 
+(** Fired when a message is sent from either an extension process (by runtime.sendMessage)
+    or a content script (by tabs.sendMessage). *)
 val on_message : message_event
 [@@js.global "chrome.runtime.onMessage"]
+
+module Message_event : sig
+    val add_listener : (Ojs.t -> message_sender -> Ojs.t Lwt.t) -> unit
+    [@@js.custom
+        let add_listener handler =
+            on_message.add_listener (fun msg sender send_response ->
+                let p = handler msg sender in
+                let resolve () = Lwt.on_any p send_response raise in
+                let send_response_async () = resolve (); Lwt.return () in
+                if Lwt.is_sleeping p then
+                    (Lwt.async send_response_async; `Async_response true)
+                else
+                    (resolve (); `Sync_or_no_response))
+    ]
+end

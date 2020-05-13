@@ -1,3 +1,10 @@
+[@@@js.stop]
+    exception Chrome_runtime_error of string
+[@@@js.start]
+[@@@js.implem
+    exception Chrome_runtime_error of string
+]
+
 module Window : sig
     type id = int
 
@@ -14,6 +21,10 @@ module Window : sig
     val type__of_js : Ojs.t -> type_
     val type__to_js : type_ -> Ojs.t
 end
+
+type extension_id = string
+
+val extension_id_to_js : extension_id -> Ojs.t
 
 type tab_status =
   | Loading [@js "loading"]
@@ -35,5 +46,39 @@ type muted_info =
   ; reason : muted_info_reason option
   }
 
-val muted_info_of_js : Ojs.t -> muted_info
-val muted_info_to_js : muted_info -> Ojs.t
+module Tab : sig
+    type id = int
+
+    val id_to_js : id -> Ojs.t
+
+    type t =
+      { active : bool
+      ; audible : bool option
+      ; autoDiscardable : bool
+      ; discarded : bool
+      ; favIconUrl : string option
+      ; height : int option
+      ; highlighted : bool
+      ; id : id option
+      ; incognito : bool
+      ; index : int
+      ; mutedInfo : muted_info option
+      ; openerTabId : int option
+      ; pendingUrl : string option
+      ; pinned : bool
+      ; sessionId : string option
+      ; status : tab_status option
+      ; title : string option
+      ; url : string option
+      ; width : int option
+      ; windowId : Window.id
+      }
+
+    val t_of_js : Ojs.t -> t
+    val t_to_js : t -> Ojs.t
+end
+
+module JSON : sig
+    val parse : string -> Ojs.t [@@js.global "JSON.parse"]
+    val stringify : Ojs.t -> string [@@js.global "JSON.stringify"]
+end

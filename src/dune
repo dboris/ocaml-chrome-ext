@@ -19,3 +19,8 @@
   (targets chrome_runtime.ml)
   (deps chrome_runtime.mli)
   (action (run %{bin:gen_js_api} %{deps})))
+
+(rule
+  (targets chrome_tabs.ml)
+  (deps chrome_tabs.mli)
+  (action (run %{bin:gen_js_api} %{deps})))
