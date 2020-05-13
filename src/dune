@@ -1,0 +1,21 @@
+(library
+  (name chrome_ext)
+  (public_name chrome_ext)
+  (modes byte)
+  (libraries
+    js_of_ocaml-lwt
+    gen_js_api)
+  (preprocess
+    (pps
+      gen_js_api.ppx
+      lwt_ppx)))
+
+(rule
+  (targets core_types.ml)
+  (deps core_types.mli)
+  (action (run %{bin:gen_js_api} %{deps})))
+
+(rule
+  (targets chrome_runtime.ml)
+  (deps chrome_runtime.mli)
+  (action (run %{bin:gen_js_api} %{deps})))

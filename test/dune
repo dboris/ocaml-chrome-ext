@@ -1,0 +1,18 @@
+(executables
+  (names
+    background
+    browser_action)
+  (modes js)
+  (libraries
+    js_of_ocaml
+    js_of_ocaml-lwt
+    gen_js_api
+    chrome_ext)
+  (preprocess
+    (pps
+      js_of_ocaml-ppx
+      lwt_ppx)))
+
+(alias
+  (name default)
+  (deps background.bc.js browser_action.bc.js manifest.json))
