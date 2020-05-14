@@ -5,6 +5,18 @@
     exception Chrome_runtime_error of string
 ]
 
+type callback_arg = [`No_arg_or_error | `Arg of Ojs.t]
+[@js.union]
+
+val callback_arg_of_js : Ojs.t -> callback_arg
+[@@js.custom
+    let callback_arg_of_js v =
+        if Ojs.is_null v then
+            `No_arg_or_error
+        else
+            `Arg v
+]
+
 module Window : sig
     type id = int
 

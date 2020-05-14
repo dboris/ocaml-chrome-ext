@@ -6,7 +6,7 @@
 (license MIT)
 (authors "Boris D.")
 (maintainers "borisd@gmx.com")
-(source (github dboris/chrome_ext))
+(source (github dboris/ocaml-chrome-ext))
 
 (package
   (name chrome_ext)

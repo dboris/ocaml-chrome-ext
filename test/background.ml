@@ -34,6 +34,6 @@ let handle_message_sync msg (_sender : Runtime.message_sender) =
 
 let () =
     (* Runtime.on_message.add_listener handle_message; *)
-    Runtime.Message_event.add_listener handle_message_lwt;
+    Runtime_lwt.Message_event.add_listener handle_message_lwt;
     (* Runtime.Message_event.add_listener handle_message_sync; *)
     print_endline "BG was run"

@@ -7,8 +7,8 @@ description:
 maintainer: ["borisd@gmx.com"]
 authors: ["Boris D."]
 license: "MIT"
-homepage: "https://github.com/dboris/chrome_ext"
-bug-reports: "https://github.com/dboris/chrome_ext/issues"
+homepage: "https://github.com/dboris/ocaml-chrome-ext"
+bug-reports: "https://github.com/dboris/ocaml-chrome-ext/issues"
 depends: [
   "dune" {>= "2.5"}
   "gen_js_api" {>= "1.0.6"}
@@ -28,4 +28,4 @@ build: [
     "@doc" {with-doc}
   ]
 ]
-dev-repo: "git+https://github.com/dboris/chrome_ext.git"
+dev-repo: "git+https://github.com/dboris/ocaml-chrome-ext.git"

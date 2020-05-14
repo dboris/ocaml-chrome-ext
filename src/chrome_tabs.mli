@@ -7,25 +7,14 @@ type send_message_opts
 val send_message_opts : ?frameId:int -> unit -> send_message_opts
 [@@js.builder]
 
-val send_message' :
-    tab_id:Tab.id ->
-    Ojs.t ->
-    ?options:send_message_opts ->
-    ?callback:(Ojs.t -> unit) ->
-    unit ->
-    unit
-[@@js.global "chrome.tabs.sendMessage"]
-
 val send_message :
     tab_id:Tab.id ->
     Ojs.t ->
     ?options:send_message_opts ->
+    ?callback:(callback_arg -> unit) ->
     unit ->
-    Ojs.t Lwt.t
-[@@js.custom
-    let send_message ~tab_id msg ?options () =
-        Chrome_runtime.wrap_callback (send_message' ~tab_id msg ?options)
-]
+    unit
+[@@js.global "chrome.tabs.sendMessage"]
 
 (* Execute script *)
 
@@ -54,16 +43,10 @@ val execute_script_opts :
     execute_script_opts
 [@@js.builder]
 
-val execute_script' :
+val execute_script :
     ?tab_id:Tab.id ->
     execute_script_opts ->
-    ?callback:(Ojs.t list -> unit) ->
+    ?callback:(callback_arg -> unit) ->
     unit ->
     unit
 [@@js.global "chrome.tabs.executeScript"]
-
-val execute_script : ?tab_id:Tab.id -> execute_script_opts -> Ojs.t list Lwt.t
-[@@js.custom
-    let execute_script ?tab_id options =
-        Chrome_runtime.wrap_callback (execute_script' ?tab_id options)
-]
