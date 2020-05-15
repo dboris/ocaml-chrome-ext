@@ -1,10 +1,5 @@
 open Core_types
 
-type error = { message : string option }
-
-val get_last_error : unit -> error option
-[@@js.get "chrome.runtime.lastError"]
-
 (* Send message *)
 
 type send_message_opts
@@ -16,7 +11,7 @@ val send_message :
     ?extension_id:extension_id ->
     Ojs.t ->
     ?options:send_message_opts ->
-    ?callback:(callback_arg -> unit) ->
+    ?callback:(Ojs.t callback_arg -> unit) ->
     unit ->
     unit
 [@@js.global "chrome.runtime.sendMessage"]
@@ -57,7 +52,7 @@ type message_event =
   ; has_listener : message_listener -> bool
   }
 
-(** Fired when a message is sent from either an extension process (by runtime.sendMessage)
-    or a content script (by tabs.sendMessage). *)
+(** Fired when a message is sent from either an extension process
+    (by runtime.sendMessage) or a content script (by tabs.sendMessage). *)
 val on_message : message_event
 [@@js.global "chrome.runtime.onMessage"]
