@@ -16,3 +16,13 @@
     (pps
       js_of_ocaml-ppx
       lwt_ppx)))
+
+(rule
+  (targets message.ml)
+  (deps message.mli)
+  (action (run %{bin:gen_js_api} %{deps})))
+
+(rule
+  (targets webtest_tests.ml)
+  (deps webtest_tests.mli)
+  (action (run %{bin:gen_js_api} %{deps})))

@@ -1,39 +1,40 @@
-open Printf
-open Js_of_ocaml_lwt
-
 open Chrome_ext
 
-let handle_message msg (_sender : Runtime.message_sender) (send_response : Ojs.t -> unit) =
-    let x = Ojs.int_of_js msg in
-    printf "Message received: %d\n" x;
-    Lwt.async (fun () ->
-        let%lwt () = Lwt_js.sleep 5. in
-        print_endline "Sending response after sleep...";
-        send_response (Ojs.int_to_js (x * 2));
-        Lwt.return ());
-    `Async_response true
+type message_sender =
+  | Test_suite_code
+  | Browser_action_popup
+  | Tab of string
+  | Other
 
-let handle_message_lwt msg (_sender : Runtime.message_sender) =
-    let x = Ojs.int_of_js msg in
-    printf "Message received: %d\n" x;
-    let%lwt () = Lwt_js.sleep 2. in
-    print_endline "Sending lwt response after sleep...";
-    Lwt.return (Ojs.int_to_js (x * 2))
+let popup_url = Runtime.get_url "browser_action_popup.html"
+let background_url = Runtime.get_url "" ^ "_generated_background_page.html"
 
-let handle_message_reject msg (_sender : Runtime.message_sender) =
-    let x = Ojs.int_of_js msg in
-    printf "Message received: %d\n" x;
-    let%lwt () = Lwt_js.sleep 5. in
-    print_endline "Sending lwt response after sleep...";
-    Lwt.fail_with "Something went wrong"
+let message_url_to_sender =
+    Option.fold
+        ~none:Other
+        ~some:(fun url ->
+            if String.equal url popup_url then Browser_action_popup
+            else if String.equal url background_url then Test_suite_code
+            else Tab url)
 
-let handle_message_sync msg (_sender : Runtime.message_sender) =
-    let x = Ojs.int_of_js msg in
-    printf "Message received: %d\n" x;
-    Lwt.return (Ojs.int_to_js (x * 2))
+let handle_test_suite_message msg =
+    let open Message.Test_suite_to_background in
+    match t_of_js msg with
+    | Increment n -> Lwt.return (increment_result (n + 1))
+
+let handle_message msg Runtime.{url; _} =
+    match message_url_to_sender url with
+    | Test_suite_code -> handle_test_suite_message msg
+    | _ -> failwith "TODO"
+
+let run_tests () =
+    Webtest_js.Runner.run ~with_colors:true Test_suite.suite
+
+let on_installed_listener Runtime.{reason; _} =
+    match reason with
+    | Install | Update -> run_tests ()
+    | _ -> ()
 
 let () =
-    (* Runtime.on_message.add_listener handle_message; *)
-    Runtime_lwt.Message_event.add_listener handle_message_lwt;
-    (* Runtime.Message_event.add_listener handle_message_sync; *)
-    print_endline "BG was run"
+    Runtime_lwt.Message_event.add_listener handle_message;
+    Runtime.on_installed.add_listener on_installed_listener

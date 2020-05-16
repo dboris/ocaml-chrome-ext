@@ -9,7 +9,9 @@ class int_to_int_message n =
 
 let () =
     Lwt.async (fun () ->
-        let%lwt result =
+        let%lwt _test_page =
+            Tabs_lwt.create (Tabs.create_opts ~url:(Runtime.get_url "test_runner.html") ())
+        and result =
             try%lwt
                 Tabs_lwt.execute_script
                     (Tabs.execute_script_opts ~file:"content_script.bc.js" ())
@@ -35,9 +37,5 @@ let () =
         printf "Tabs count: %d\n" (List.length tabs);
         let tab = List.hd tabs in
         tab.url |> Option.iter (printf "Tab url: %s\n");
-
-        let%lwt _test_page =
-            Tabs_lwt.create (Tabs.create_opts ~url:(Runtime.get_url "test_runner.html") ()) in
-        print_endline "Opened test page";
         Lwt.return ());
     print_endline "BA was run"

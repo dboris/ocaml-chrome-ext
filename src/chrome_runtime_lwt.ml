@@ -12,13 +12,9 @@ module Message_event = struct
     let add_listener handler =
         on_message.add_listener @@ fun msg sender send_response ->
             let p = handler msg sender in
-            let resolve () =
-                Lwt.on_any p send_response raise in
-            let send_response_async () =
-                resolve ();
-                Lwt.return () in
+            let resolve () = Lwt.on_any p send_response raise in
             if Lwt.is_sleeping p then begin
-                Lwt.async send_response_async;
+                Lwt.async (fun () -> resolve (); Lwt.return ());
                 `Async_response true
             end
             else begin

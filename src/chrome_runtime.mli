@@ -1,5 +1,10 @@
 open Core_types
 
+(* Get url *)
+
+val get_url : string -> string
+[@@js.global "chrome.runtime.getURL"]
+
 (* Send message *)
 
 type send_message_opts
@@ -59,7 +64,30 @@ type message_event =
 val on_message : message_event
 [@@js.global "chrome.runtime.onMessage"]
 
-(* Get url *)
+(* Installed event *)
 
-val get_url : string -> string
-[@@js.global "chrome.runtime.getURL"]
+type on_installed_reason =
+  | Install [@js "install"]
+  | Update [@js "update"]
+  | Browser_update [@js "chrome_update"]
+  | Shared_module_update [@js "shared_module_update"]
+[@@js.enum]
+
+type on_installed_details =
+  { id : string option
+  ; previousVersion : string option
+  ; reason : on_installed_reason
+  }
+
+type on_installed_listener = on_installed_details -> unit
+
+(** Fired when the extension is first installed, when the extension is updated
+    to a new version, and when the browser is updated to a new version. *)
+type on_installed_event =
+  { add_listener : on_installed_listener -> unit
+  ; remove_listener : on_installed_listener -> unit
+  ; has_listener : on_installed_listener -> bool
+  }
+
+val on_installed : on_installed_event
+[@@js.global "chrome.runtime.onInstalled"]
