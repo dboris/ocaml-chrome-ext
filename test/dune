@@ -2,12 +2,15 @@
   (names
     background
     browser_action
-    content_script)
+    content_script
+    test_runner)
   (modes js)
   (libraries
     js_of_ocaml
     js_of_ocaml-lwt
     gen_js_api
+    webtest
+    webtest-js
     chrome_ext)
   (preprocess
     (pps

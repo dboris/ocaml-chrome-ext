@@ -19,5 +19,9 @@
     "browser_action": {
         "default_title": "Test Chrome Ext",
         "default_popup": "browser_action_popup.html"
-    }
+    },
+
+    "web_accessible_resources": [
+        "test_runner.html"
+    ]
 }

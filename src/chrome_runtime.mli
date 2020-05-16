@@ -16,6 +16,8 @@ val send_message :
     unit
 [@@js.global "chrome.runtime.sendMessage"]
 
+(* Message event *)
+
 type message_sender =
   { tab : Tab.t option
   ; frameId : int option
@@ -56,3 +58,8 @@ type message_event =
     (by runtime.sendMessage) or a content script (by tabs.sendMessage). *)
 val on_message : message_event
 [@@js.global "chrome.runtime.onMessage"]
+
+(* Get url *)
+
+val get_url : string -> string
+[@@js.global "chrome.runtime.getURL"]

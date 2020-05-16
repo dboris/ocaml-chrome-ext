@@ -1,6 +1,12 @@
 open Printf
 open Chrome_ext
 
+class int_to_int_message n =
+    object
+        method to_js = Ojs.int_to_js n
+        method of_js = Ojs.int_of_js
+    end
+
 let () =
     Lwt.async (fun () ->
         let%lwt result =
@@ -21,8 +27,7 @@ let () =
         result
         |> List.iter (fun o -> printf "exec script result: %s\n" (JSON.stringify(o)));
         let%lwt response =
-            Runtime_lwt.send_message (Ojs.int_to_js 42) ()
-            |> Lwt.map Ojs.int_of_js
+            Runtime_lwt.send_message' (new int_to_int_message 42) ()
         in
         if Int.equal response 84 then print_endline "Response correct";
         let%lwt tabs =
@@ -30,5 +35,9 @@ let () =
         printf "Tabs count: %d\n" (List.length tabs);
         let tab = List.hd tabs in
         tab.url |> Option.iter (printf "Tab url: %s\n");
+
+        let%lwt _test_page =
+            Tabs_lwt.create (Tabs.create_opts ~url:(Runtime.get_url "test_runner.html") ()) in
+        print_endline "Opened test page";
         Lwt.return ());
     print_endline "BA was run"
