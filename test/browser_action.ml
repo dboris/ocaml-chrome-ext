@@ -1,4 +1,3 @@
-open Printf
 open Chrome_ext
 
 class int_to_int_message n =
@@ -8,10 +7,11 @@ class int_to_int_message n =
     end
 
 let () =
-    Lwt.async (fun () ->
-        let%lwt _test_page =
+    Lwt.async @@ fun () ->
+        let%lwt _ =
             Tabs_lwt.create (Tabs.create_opts ~url:(Runtime.get_url "test_runner.html") ())
-        and result =
+        in
+        (* and result =
             try%lwt
                 Tabs_lwt.execute_script
                     (Tabs.execute_script_opts ~file:"content_script.bc.js" ())
@@ -36,6 +36,5 @@ let () =
             Tabs_lwt.query (Tabs.query_opts ~currentWindow:true ~active:true ()) in
         printf "Tabs count: %d\n" (List.length tabs);
         let tab = List.hd tabs in
-        tab.url |> Option.iter (printf "Tab url: %s\n");
-        Lwt.return ());
-    print_endline "BA was run"
+        tab.url |> Option.iter (printf "Tab url: %s\n"); *)
+        Lwt.return ()

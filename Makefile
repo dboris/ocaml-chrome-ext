@@ -14,7 +14,7 @@ dist:
 	mkdir -p dist
 	cp -f $(BUILD)/test/*.{js,json,html} dist/ 2>/dev/null || true
 
-debug: dist
+debug: build dist
 	cp -f $(BUILD)/test/*.ml dist/ 2>/dev/null || true
 
 clean:
