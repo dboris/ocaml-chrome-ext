@@ -21,7 +21,8 @@ let test_send_message_and_message_listener wrapper =
 
 let test_create_tab wrapper =
     Lwt.async @@ fun () ->
-        let%lwt tab = Tabs_lwt.create (Tabs.create_opts ~url:(Runtime.get_url "test_runner.html") ()) in
+        let url = "https://developer.mozilla.org/fr/docs/Mozilla/Add-ons/WebExtensions/API" in
+        let%lwt tab = Tabs_lwt.create (Tabs.create_opts ~url ()) in
         wrapper (fun () -> assert_true (tab.index > 0));
         Lwt.return ()
 

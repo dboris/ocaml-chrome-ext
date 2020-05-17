@@ -13,5 +13,9 @@ let query options : Tab.t list Lwt.t =
 let create options : Tab.t Lwt.t =
     wrap_callback (create options)
 
+let remove tabs : unit Lwt.t =
+    let%lwt _ = wrap_callback (remove tabs) in
+    Lwt.return ()
+
 let detect_language ?tab_id () : string Lwt.t =
     wrap_callback (detect_language ?tab_id)

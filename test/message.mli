@@ -14,6 +14,6 @@ module Test_suite_to_background : sig
             |> Lwt.map Ojs.int_of_js
     ]
 
-    val increment_result : int -> Ojs.t
-    [@@js.custom let increment_result = Ojs.int_to_js]
+    val to_increment_result : int -> Ojs.t
+    [@@js.custom let to_increment_result = Ojs.int_to_js]
 end

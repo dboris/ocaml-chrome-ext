@@ -105,6 +105,27 @@ val create :
     unit
 [@@js.global "chrome.tabs.create"]
 
+(* Remove tab *)
+
+(* type void = [`Void]
+[@js.union]
+
+val void_to_js : void -> Ojs.t
+
+val void_of_js : Ojs.t -> void
+[@@js.custom let void_of_js _ = `Void] *)
+
+type tabid_or_tabid_array =
+  [ `Single_tab of Tab.id | `Multiple_tabs of Tab.id array ]
+[@js.union]
+
+val remove :
+    tabid_or_tabid_array ->
+    ?callback:(Ojs.t option callback_arg -> unit) ->
+    unit ->
+    unit
+[@@js.global "chrome.tabs.remove"]
+
 (* Detect language *)
 
 val detect_language :
