@@ -24,3 +24,8 @@
   (targets chrome_tabs.ml)
   (deps chrome_tabs.mli)
   (action (run %{bin:gen_js_api} %{deps})))
+
+(rule
+  (targets chrome_storage.ml)
+  (deps chrome_storage.mli)
+  (action (run %{bin:gen_js_api} %{deps})))

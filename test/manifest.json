@@ -1,7 +1,7 @@
 {
-    "name": "Test Chrome Ext API",
+    "name": "ocaml-chrome-ext test runner",
     "version": "1.0",
-    "description": "Test Chrome Extensions API binding.",
+    "description": "Test OCaml Chrome Extensions API bindings.",
     "manifest_version": 2,
 
     "permissions": [

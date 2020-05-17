@@ -13,6 +13,8 @@ val get_last_error : unit -> error option
     val wrap_callback :
         (?callback:('a callback_arg -> unit) -> unit -> unit) ->
         'a Lwt.t
+
+    val wrap_callback' : (callback:('a callback_arg -> unit) -> unit) -> 'a Lwt.t
 [@@@js.start]
 
 [@@@js.implem
@@ -22,6 +24,7 @@ val get_last_error : unit -> error option
 
     let callback_arg_of_js alpha_of_js v = (alpha_of_js, v)
 
+    (* Wrap optional callback *)
     let wrap_callback f =
         let (p, r) = Lwt.wait () in
         let callback (alpha_of_js, ojs) =
@@ -38,6 +41,25 @@ val get_last_error : unit -> error option
                 Lwt.wakeup r (alpha_of_js ojs)
         in
         let () = f ?callback:(Some callback) () in
+        p
+
+    (* Wrap non-optional callback *)
+    let wrap_callback' f =
+        let (p, r) = Lwt.wait () in
+        let callback (alpha_of_js, ojs) =
+            let last_error = get_last_error () in
+            if Option.is_some last_error then
+                let error_message =
+                    last_error
+                    |> Option.get
+                    |> (fun {message} ->
+                        Option.value message ~default:"No message was provided")
+                in
+                Lwt.wakeup_exn r (Chrome_runtime_error error_message)
+            else
+                Lwt.wakeup r (alpha_of_js ojs)
+        in
+        let () = f ~callback in
         p
 ]
 
@@ -125,6 +147,31 @@ module Tab : sig
 end
 
 module JSON : sig
-    val parse : string -> Ojs.t [@@js.global "JSON.parse"]
-    val stringify : Ojs.t -> string [@@js.global "JSON.stringify"]
+    val parse : string -> Ojs.t [@@js.global]
+    val stringify : Ojs.t -> string [@@js.global]
+end [@js.scope "JSON"]
+
+module Dict : sig
+    [@@@js.stop]
+    type 'a t = (string * 'a) list
+
+    val t_to_js: ('a -> Ojs.t) -> 'a t -> Ojs.t
+
+    val t_of_js: (Ojs.t -> 'a) -> Ojs.t -> 'a t
+    [@@@js.start]
+
+    [@@@js.implem
+        type 'a t = (string * 'a) list
+
+        let t_to_js alpha_to_js l =
+            let o = Ojs.empty_obj () in
+            List.iter (fun (k, v) -> Ojs.set o k (alpha_to_js v)) l;
+            o
+
+        let t_of_js alpha_of_js o =
+            let l = ref [] in
+            Ojs.iter_properties o
+                (fun k -> l := (k, alpha_of_js (Ojs.get o k)) :: !l);
+            !l
+    ]
 end

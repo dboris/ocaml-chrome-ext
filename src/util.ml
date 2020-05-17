@@ -1,6 +1,8 @@
 module Dict : sig
     type 'a t = (string * 'a) list
+
     val t_to_js: ('a -> Ojs.t) -> 'a t -> Ojs.t
+
     val t_of_js: (Ojs.t -> 'a) -> Ojs.t -> 'a t
 end = struct
     type 'a t = (string * 'a) list
