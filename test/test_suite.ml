@@ -19,7 +19,7 @@ let test_send_message_and_message_listener wrapper =
         wrapper (fun () -> assert_equal actual expected);
         Lwt.return ()
 
-let test_create_tab wrapper =
+let test_tab_create wrapper =
     Lwt.async @@ fun () ->
         let url = "https://developer.mozilla.org/fr/docs/Mozilla/Add-ons/WebExtensions/API" in
         let%lwt tab = Tabs_lwt.create (Tabs.create_opts ~url ()) in
@@ -80,17 +80,41 @@ let test_storage_remove wrapper =
         wrapper (fun () -> assert_equal actual expected);
         Lwt.return ()
 
+let test_tab_update wrapper =
+    Lwt.async @@ fun () ->
+        let open Tabs in
+        let%lwt tabs =
+            Tabs_lwt.query (query_opts ~active:true ~currentWindow:true ()) in
+        assert (Int.equal (List.length tabs) 1);
+        let tab_id = List.hd tabs |> (fun {id; _} -> Option.get id) in
+        let update_listener tab_id' {mutedInfo; _} _tab =
+            if Int.equal tab_id' tab_id then
+                if Option.is_some mutedInfo then
+                    let Tab.{muted; _} = Option.get mutedInfo in
+                    wrapper (fun () -> assert_true muted)
+                else
+                    wrapper Async.noop
+        in
+        on_updated.add_listener update_listener;
+        let%lwt _ = Tabs_lwt.update tab_id (update_opts ~muted:true ()) in
+        Lwt.return ()
+
 let suite =
-    "runtime" >::: [
+    "content script tests" >::: [
         "test_get_url" >:: test_get_url;
         (* "test_fail" >:: test_fail; *)
         "test_send_message_and_message_listener" >:~ test_send_message_and_message_listener;
+        "test_storage_clear_and_get_all" >:~ test_storage_clear_and_get_all;
+        "test_storage_set_and_get" >:~ test_storage_set_and_get;
+        "test_storage_get_with_defaults" >:~ test_storage_get_with_defaults;
+        "test_storage_remove" >:~ test_storage_remove;
     ]
 
 let background_suite =
-    "runtime" >::: [
-        "test_get_url" >:: test_get_url;
-        "test_create_tab" >:~ test_create_tab;
+    "background tests" >::: [
+        "test_runtime_get_url" >:: test_get_url;
+        "test_tab_create" >:~ test_tab_create;
+        "test_tab_update" >:~ test_tab_update;
         "test_storage_clear_and_get_all" >:~ test_storage_clear_and_get_all;
         "test_storage_set_and_get" >:~ test_storage_set_and_get;
         "test_storage_get_with_defaults" >:~ test_storage_get_with_defaults;

@@ -14,7 +14,7 @@ val get_last_error : unit -> error option
         (?callback:('a callback_arg -> unit) -> unit -> unit) ->
         'a Lwt.t
 
-    val wrap_callback' : (callback:('a callback_arg -> unit) -> unit) -> 'a Lwt.t
+    val wrap_required_callback : (callback:('a callback_arg -> unit) -> unit) -> 'a Lwt.t
 
     val wrap_callback_with_result :
         (?callback:('a callback_arg -> unit) -> unit -> 'b) ->
@@ -48,7 +48,7 @@ val get_last_error : unit -> error option
         p
 
     (* Wrap non-optional callback *)
-    let wrap_callback' f =
+    let wrap_required_callback f =
         let (p, r) = Lwt.wait () in
         let callback (alpha_of_js, ojs) =
             let last_error = get_last_error () in

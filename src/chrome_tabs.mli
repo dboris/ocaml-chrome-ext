@@ -107,14 +107,6 @@ val create :
 
 (* Remove tab *)
 
-(* type void = [`Void]
-[@js.union]
-
-val void_to_js : void -> Ojs.t
-
-val void_of_js : Ojs.t -> void
-[@@js.custom let void_of_js _ = `Void] *)
-
 type tabid_or_tabid_array =
   [ `Single_tab of Tab.id | `Multiple_tabs of Tab.id array ]
 [@js.union]
@@ -125,6 +117,29 @@ val remove :
     unit ->
     unit
 [@@js.global "chrome.tabs.remove"]
+
+(* Update tab *)
+
+type update_opts
+
+val update_opts :
+    ?active:bool ->
+    ?autoDiscardable:bool ->
+    ?highlighted:bool ->
+    ?muted:bool ->
+    ?openerTabId:Tab.id ->
+    ?pinned:bool ->
+    ?url:string ->
+    unit ->
+    update_opts
+[@@js.builder]
+
+val update :
+    Tab.id ->
+    update_opts ->
+    callback:(Tab.t callback_arg -> unit) ->
+    unit
+[@@js.global "chrome.tabs.update"]
 
 (* Detect language *)
 

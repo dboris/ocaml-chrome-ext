@@ -19,3 +19,6 @@ let remove tabs : unit Lwt.t =
 
 let detect_language ?tab_id () : string Lwt.t =
     wrap_callback (detect_language ?tab_id)
+
+let update tab_id options : Tab.t Lwt.t =
+    wrap_required_callback (update tab_id options)
