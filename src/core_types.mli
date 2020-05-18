@@ -15,6 +15,10 @@ val get_last_error : unit -> error option
         'a Lwt.t
 
     val wrap_callback' : (callback:('a callback_arg -> unit) -> unit) -> 'a Lwt.t
+
+    val wrap_callback_with_result :
+        (?callback:('a callback_arg -> unit) -> unit -> 'b) ->
+        ('a * 'b) Lwt.t
 [@@@js.start]
 
 [@@@js.implem
@@ -61,6 +65,25 @@ val get_last_error : unit -> error option
         in
         let () = f ~callback in
         p
+
+    let wrap_callback_with_result f =
+        let (p, r) = Lwt.wait () in
+        let callback (alpha_of_js, ojs) =
+            let last_error = get_last_error () in
+            if Option.is_some last_error then
+                let error_message =
+                    last_error
+                    |> Option.get
+                    |> (fun {message} ->
+                        Option.value message ~default:"No message was provided")
+                in
+                Lwt.wakeup_exn r (Chrome_runtime_error error_message)
+            else
+                Lwt.wakeup r (alpha_of_js ojs)
+        in
+        let result = f ?callback:(Some callback) () in
+        let%lwt cb_result = p in
+        Lwt.return (cb_result, result)
 ]
 
 type string_or_string_array =

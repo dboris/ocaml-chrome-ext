@@ -29,3 +29,8 @@
   (targets chrome_storage.ml)
   (deps chrome_storage.mli)
   (action (run %{bin:gen_js_api} %{deps})))
+
+(rule
+  (targets chrome_context_menus.ml)
+  (deps chrome_context_menus.mli)
+  (action (run %{bin:gen_js_api} %{deps})))

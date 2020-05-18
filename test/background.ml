@@ -1,3 +1,4 @@
+open Printf
 open Js_of_ocaml_lwt
 open Chrome_ext
 
@@ -28,7 +29,7 @@ let handle_message msg Runtime.{url; origin; _} =
     | Tab_or_frame _ ->
         handle_test_suite_message msg
     | _ ->
-        Printf.printf "Unhandled message %s from: %s (%s)\n"
+        printf "Unhandled message %s from: %s (%s)\n"
             (JSON.stringify msg) (Option.get url) (Option.get origin);
         Lwt.return Ojs.null
 
@@ -38,9 +39,28 @@ let run_tests () =
         Lwt.return ());
     Webtest_js.Runner.run ~with_colors:true Test_suite.background_suite
 
+let setup_context_menus () =
+    let open Context_menus in
+    let onclick _ _ = run_tests () in
+    let%lwt mid =
+        Context_menus_lwt.create
+            (create_opts
+                ~id:"Run_tests"
+                ~title:"Run tests"
+                ~contexts:[All]
+                ~onclick
+                ())
+    in
+    (match mid with
+    | `Int n -> printf "Menu item id: %d" n
+    | `String s -> printf "Menu item id: %s" s);
+    Lwt.return ()
+
 let on_installed_listener Runtime.{reason; _} =
     match reason with
-    | Install | Update -> run_tests ()
+    | Install | Update ->
+        run_tests ();
+        Lwt.async setup_context_menus
     | _ -> ()
 
 let () =
@@ -51,5 +71,5 @@ let () =
         let%lwt () = Lwt_js.sleep 3.
         and lang = Tabs_lwt.detect_language ()
         in
-        Printf.printf "Detected language: %s\n" lang;
+        printf "Detected language: %s\n" lang;
         Lwt.return ()

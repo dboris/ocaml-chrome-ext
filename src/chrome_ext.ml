@@ -8,3 +8,6 @@ module Tabs_lwt = Chrome_tabs_lwt
 
 module Storage = Chrome_storage
 module Storage_lwt = Chrome_storage_lwt
+
+module Context_menus = Chrome_context_menus
+module Context_menus_lwt = Chrome_context_menus_lwt

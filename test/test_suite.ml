@@ -26,13 +26,15 @@ let test_create_tab wrapper =
         wrapper (fun () -> assert_true (tab.index > 0));
         Lwt.return ()
 
-let test_storage_clear wrapper =
+let test_storage_clear_and_get_all wrapper =
     Lwt.async @@ fun () ->
+        let open Storage_lwt.Local in
         let item = ["x", Ojs.int_to_js 42]
-        and expected = [] in
-        let%lwt () = Storage_lwt.Local.set item
-        and () = Storage_lwt.Local.clear ()
-        and actual = Storage_lwt.Local.get_all ()
+        and expected = []
+        in
+        let%lwt () = set item
+        and () = clear ()
+        and actual = get_all ()
         in
         wrapper (fun () -> assert_equal actual expected);
         Lwt.return ()
@@ -48,20 +50,34 @@ let test_storage_set_and_get wrapper =
 
 let test_storage_get_with_defaults wrapper =
     Lwt.async @@ fun () ->
-        let%lwt () = Storage_lwt.Local.clear ()
-        and () = Storage_lwt.Local.set ["x", Ojs.int_to_js 42]
-        and actual =
-            Storage_lwt.Local.get_with_defaults
-                [ "x", Ojs.int_to_js 1
-                ; "y", Ojs.int_to_js 2
-                ]
+        let x = Ojs.int_to_js 42
+        and y = Ojs.string_to_js "hi"
+        and compare_keys i1 i2 =
+            String.compare (fst i1) (fst i2)
         in
-        let expected = ["x", Ojs.int_to_js 42; "y", Ojs.int_to_js 2]
-        and actual_sorted =
-            actual
-            |> List.sort (fun i1 i2 -> String.compare (fst i1) (fst i2))
+        let%lwt () = Storage_lwt.Local.clear ()
+        and () = Storage_lwt.Local.set ["x", x]
+        and actual =
+            Storage_lwt.Local.get_with_defaults ["x", Ojs.int_to_js 1; "y", y]
+        in
+        let expected = ["x", x; "y", y]
+        and actual_sorted = List.sort compare_keys actual
         in
         wrapper (fun () -> assert_equal actual_sorted expected);
+        Lwt.return ()
+
+let test_storage_remove wrapper =
+    Lwt.async @@ fun () ->
+        let open Storage_lwt.Local in
+        let item = ["x", Ojs.int_to_js 42]
+        and expected = []
+        in
+        let%lwt () = clear ()
+        and () = set item
+        and () = remove_key "x"
+        and actual = get_all ()
+        in
+        wrapper (fun () -> assert_equal actual expected);
         Lwt.return ()
 
 let suite =
@@ -75,7 +91,8 @@ let background_suite =
     "runtime" >::: [
         "test_get_url" >:: test_get_url;
         "test_create_tab" >:~ test_create_tab;
-        "test_storage_clear" >:~ test_storage_clear;
+        "test_storage_clear_and_get_all" >:~ test_storage_clear_and_get_all;
         "test_storage_set_and_get" >:~ test_storage_set_and_get;
         "test_storage_get_with_defaults" >:~ test_storage_get_with_defaults;
+        "test_storage_remove" >:~ test_storage_remove;
     ]
