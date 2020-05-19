@@ -7,6 +7,10 @@ let send_message ~tab_id msg ?options () =
 let execute_script ?tab_id options : Ojs.t list Lwt.t =
     wrap_callback (execute_script ?tab_id options)
 
+let insert_css ?tab_id options : unit Lwt.t =
+    let%lwt _ = wrap_callback (insert_css ?tab_id options) in
+    Lwt.return ()
+
 let query options : Tab.t list Lwt.t =
     wrap_callback (query options)
 

@@ -16,7 +16,7 @@ val send_message :
     unit
 [@@js.global "chrome.tabs.sendMessage"]
 
-(* Execute script *)
+(* Execute script and insert css *)
 
 type run_at =
   | Document_idle [@js "document_idle"]  (* default *)
@@ -50,6 +50,28 @@ val execute_script :
     unit ->
     unit
 [@@js.global "chrome.tabs.executeScript"]
+
+type insert_css_opts
+
+val insert_css_opts :
+    ?allFrames:bool ->
+    ?code:string ->
+    ?cssOrigin:css_origin ->
+    ?file:string ->
+    ?frameId:int ->
+    ?matchAboutBlank:bool ->
+    ?runAt:run_at ->
+    unit ->
+    insert_css_opts
+[@@js.builder]
+
+val insert_css :
+    ?tab_id:Tab.id ->
+    insert_css_opts ->
+    ?callback:(Ojs.t option callback_arg -> unit) ->
+    unit ->
+    unit
+[@@js.global "chrome.tabs.insertCSS"]
 
 (* Query tabs *)
 

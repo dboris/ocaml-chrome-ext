@@ -88,15 +88,19 @@ let test_tab_update wrapper =
         assert (Int.equal (List.length tabs) 1);
         let tab_id = List.hd tabs |> (fun {id; _} -> Option.get id) in
         let update_listener tab_id' {mutedInfo; _} _tab =
-            if Int.equal tab_id' tab_id then
-                if Option.is_some mutedInfo then
-                    let Tab.{muted; _} = Option.get mutedInfo in
-                    wrapper (fun () -> assert_true muted)
-                else
-                    wrapper Async.noop
+            if Int.equal tab_id' tab_id && Option.is_some mutedInfo then
+                let Tab.{muted; _} = Option.get mutedInfo in
+                wrapper (fun () -> assert_true muted)
         in
         on_updated.add_listener update_listener;
         let%lwt _ = Tabs_lwt.update tab_id (update_opts ~muted:true ()) in
+        Lwt.return ()
+
+let test_tab_insert_css wrapper =
+    Lwt.async @@ fun () ->
+        let code = "h1 {border: 1px solid red !important}" in
+        let%lwt () = Tabs_lwt.insert_css (Tabs.insert_css_opts ~code ()) in
+        wrapper Async.noop;
         Lwt.return ()
 
 let suite =
@@ -119,4 +123,5 @@ let background_suite =
         "test_storage_set_and_get" >:~ test_storage_set_and_get;
         "test_storage_get_with_defaults" >:~ test_storage_get_with_defaults;
         "test_storage_remove" >:~ test_storage_remove;
+        "test_tab_insert_css" >:~ test_tab_insert_css;
     ]
