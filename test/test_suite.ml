@@ -1,9 +1,23 @@
-open Webtest.Suite
 open Js_of_ocaml
+open Js_of_ocaml_lwt
+open Webtest.Suite
 
 open Chrome_ext
 
-let test_get_url () =
+let active_tab_id () =
+    let%lwt tabs =
+        Tabs_lwt.query (Tabs.query_opts ~active:true ~currentWindow:true ()) in
+    if not (Int.equal (List.length tabs) 1) then
+        raise (Chrome_runtime_error "Active tab in current window could not be determined");
+    let tab_id_of_tab Tab.{id; _} =
+        if Option.is_some id then
+            Option.get id
+        else
+            raise (Chrome_runtime_error "ID of active tab in current window could not be determined")
+    in
+    Lwt.return (tab_id_of_tab (List.hd tabs))
+
+let test_runtime_get_url () =
     let actual = Runtime.get_url "test_runner.html" |> Js.string in
     let expected_re = new%js Js.regExp (Js.string "chrome-extension://\\w+/test_runner\\.html") in
     assert_true (expected_re##test actual |> Js.to_bool)
@@ -19,7 +33,7 @@ let test_send_message_and_message_listener wrapper =
         wrapper (fun () -> assert_equal actual expected);
         Lwt.return ()
 
-let test_tab_create wrapper =
+let test_tabs_create wrapper =
     Lwt.async @@ fun () ->
         let url = "https://developer.mozilla.org/fr/docs/Mozilla/Add-ons/WebExtensions/API" in
         let%lwt tab = Tabs_lwt.create (Tabs.create_opts ~url ()) in
@@ -80,32 +94,46 @@ let test_storage_remove wrapper =
         wrapper (fun () -> assert_equal actual expected);
         Lwt.return ()
 
-let test_tab_update wrapper =
+let test_tabs_update wrapper =
     Lwt.async @@ fun () ->
-        let open Tabs in
-        let%lwt tabs =
-            Tabs_lwt.query (query_opts ~active:true ~currentWindow:true ()) in
-        assert (Int.equal (List.length tabs) 1);
-        let tab_id = List.hd tabs |> (fun {id; _} -> Option.get id) in
-        let update_listener tab_id' {mutedInfo; _} _tab =
+        let%lwt tab_id = active_tab_id () in
+        let update_listener tab_id' Tabs.{mutedInfo; _} _tab =
             if Int.equal tab_id' tab_id && Option.is_some mutedInfo then
                 let Tab.{muted; _} = Option.get mutedInfo in
                 wrapper (fun () -> assert_true muted)
         in
-        on_updated.add_listener update_listener;
-        let%lwt _ = Tabs_lwt.update tab_id (update_opts ~muted:true ()) in
+        Tabs.on_updated.add_listener update_listener;
+        let%lwt _ = Tabs_lwt.update tab_id (Tabs.update_opts ~muted:true ()) in
         Lwt.return ()
 
-let test_tab_insert_css wrapper =
+let test_tabs_insert_css wrapper =
     Lwt.async @@ fun () ->
         let code = "h1 {border: 1px solid red !important}" in
         let%lwt () = Tabs_lwt.insert_css (Tabs.insert_css_opts ~code ()) in
         wrapper Async.noop;
         Lwt.return ()
 
+let test_tabs_send_message wrapper =
+    Lwt.async @@ fun () ->
+        let%lwt tab_id = active_tab_id () in
+        let file = "content_script.bc.js"
+        and expected = "HOLA" in
+        let%lwt _ =
+            Tabs_lwt.execute_script
+                ~tab_id
+                (Tabs.execute_script_opts ~file ~runAt:Tabs.Document_start ())
+        in
+        let%lwt actual =
+            Tabs_lwt.send_message ~tab_id (Ojs.string_to_js "hola") ()
+        in
+        actual
+        |> Option.iter (fun actual ->
+            wrapper (fun () -> assert_equal (Ojs.string_of_js actual) expected));
+        Lwt.return ()
+
 let suite =
-    "content script tests" >::: [
-        "test_get_url" >:: test_get_url;
+    "content_script" >::: [
+        "test_runtime_get_url" >:: test_runtime_get_url;
         (* "test_fail" >:: test_fail; *)
         "test_send_message_and_message_listener" >:~ test_send_message_and_message_listener;
         "test_storage_clear_and_get_all" >:~ test_storage_clear_and_get_all;
@@ -115,13 +143,14 @@ let suite =
     ]
 
 let background_suite =
-    "background tests" >::: [
-        "test_runtime_get_url" >:: test_get_url;
-        "test_tab_create" >:~ test_tab_create;
-        "test_tab_update" >:~ test_tab_update;
+    "background" >::: [
+        "test_runtime_get_url" >:: test_runtime_get_url;
+        "test_tabs_create" >:~ test_tabs_create;
+        "test_tabs_update" >:~ test_tabs_update;
+        "test_tabs_insert_css" >:~ test_tabs_insert_css;
+        "test_tabs_send_message" >:~ test_tabs_send_message;
         "test_storage_clear_and_get_all" >:~ test_storage_clear_and_get_all;
         "test_storage_set_and_get" >:~ test_storage_set_and_get;
         "test_storage_get_with_defaults" >:~ test_storage_get_with_defaults;
         "test_storage_remove" >:~ test_storage_remove;
-        "test_tab_insert_css" >:~ test_tab_insert_css;
     ]

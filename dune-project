@@ -3,15 +3,19 @@
 (version 0.1.0)
 
 (generate_opam_files true)
-(license MIT)
 (authors "Boris D.")
 (maintainers "borisd@gmx.com")
 (source (github dboris/ocaml-chrome-ext))
+(license MIT)
 
 (package
   (name chrome_ext)
-  (synopsis "OCaml bindings to the browser extensions JavaScript API")
-  (description "Partial bindings to the browser extensions JavaScript API implemented via gen_js_api.")
+  (synopsis "OCaml bindings to the Chrome browser extensions JavaScript API")
+  (description "Partial bindings to the Chrome browser extensions JavaScript API implemented via gen_js_api.")
   (depends
+    (js_of_ocaml (> 3.4.0))
+    (js_of_ocaml-lwt (> 3.4.0))
+    (js_of_ocaml-ppx (> 3.4.0))
     (gen_js_api (>= 1.0.6))
-    (js_of_ocaml-lwt (> 3.5.0))))
+    (webtest (>= 2.0.0))
+    (webtest-js (>= 2.0.0))))

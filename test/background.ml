@@ -21,17 +21,28 @@ let handle_test_suite_message msg =
     let open Message.Test_suite_to_background in
     match t_of_js msg with
     | Increment n ->
-        Lwt.return (to_increment_result (n + 1))
+        Lwt.return (Some (to_increment_result (n + 1)))
+    | Init ->
+        print_endline "Content script sent Init message.";
+        Lwt.return None
 
 let handle_message msg Runtime.{url; origin; _} =
     match sender_of_message_url url with
     | Browser_action_popup
     | Tab_or_frame _ ->
-        handle_test_suite_message msg
+        (match msg with
+        | Some msg ->
+            handle_test_suite_message msg
+        | None ->
+            Lwt.return None)
     | _ ->
-        printf "Unhandled message %s from: %s (%s)\n"
-            (JSON.stringify msg) (Option.get url) (Option.get origin);
-        Lwt.return Ojs.null
+        msg |> Option.iter (fun msg ->
+            let default = "unknown" in
+            printf "Unhandled message %s from: %s (%s)\n"
+                (JSON.stringify msg)
+                (Option.value url ~default)
+                (Option.value origin  ~default));
+        Lwt.return None
 
 let run_tests () =
     Lwt.async (fun () ->
@@ -52,8 +63,8 @@ let setup_context_menus () =
                 ())
     in
     (match mid with
-    | `Int n -> printf "Menu item id: %d" n
-    | `String s -> printf "Menu item id: %s" s);
+    | `Int n -> printf "Menu item id: %d\n" n
+    | `String s -> printf "Menu item id: %s\n" s);
     Lwt.return ()
 
 let on_installed_listener Runtime.{reason; _} =

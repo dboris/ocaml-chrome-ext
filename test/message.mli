@@ -2,6 +2,7 @@
 module Test_suite_to_background : sig
     type t =
       | Increment of int  (* -> int *)
+      | Init
     [@@js.sum]
 
     val t_to_js : t -> Ojs.t

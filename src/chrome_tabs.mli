@@ -11,7 +11,7 @@ val send_message :
     tab_id:Tab.id ->
     Ojs.t ->
     ?options:send_message_opts ->
-    ?callback:(Ojs.t callback_arg -> unit) ->
+    ?callback:(Ojs.t option callback_arg -> unit) ->
     unit ->
     unit
 [@@js.global "chrome.tabs.sendMessage"]

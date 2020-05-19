@@ -48,9 +48,9 @@ val message_listener_response_of_js : Ojs.t -> message_listener_response
 ]
 
 type message_listener =
-    Ojs.t ->
+    Ojs.t option ->
     message_sender ->
-    (Ojs.t -> unit) ->
+    (Ojs.t option -> unit) ->
     message_listener_response
 
 type message_event =
