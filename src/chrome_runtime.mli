@@ -33,6 +33,9 @@ type message_sender =
   ; origin : string option
   }
 
+val message_sender_to_js : message_sender -> Ojs.t
+val message_sender_of_js : Ojs.t -> message_sender
+
 type message_listener_response = [`Sync_or_no_response | `Async_response of bool]
 [@js.union]
 
