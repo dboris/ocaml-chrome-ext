@@ -2,9 +2,9 @@ open Chrome_ext
 
 let message_handler msg Runtime.{url; _} =
     url |> Option.iter (Printf.printf "Received message from %s\n");
-    Lwt.return
-        (msg |> Option.map
-            (fun msg -> Ojs.string_to_js (String.uppercase_ascii (Ojs.string_of_js msg))))
+    let result =
+        Ojs.string_to_js (String.uppercase_ascii (Ojs.string_of_js msg)) in
+    Lwt.return (Some result)
 
 let () =
     Runtime_lwt.Message_event.add_listener message_handler;

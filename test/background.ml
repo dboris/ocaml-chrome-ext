@@ -30,18 +30,13 @@ let handle_message msg Runtime.{url; origin; _} =
     match sender_of_message_url url with
     | Browser_action_popup
     | Tab_or_frame _ ->
-        (match msg with
-        | Some msg ->
-            handle_test_suite_message msg
-        | None ->
-            Lwt.return None)
+        handle_test_suite_message msg
     | _ ->
-        msg |> Option.iter (fun msg ->
-            let default = "unknown" in
-            printf "Unhandled message %s from: %s (%s)\n"
-                (JSON.stringify msg)
-                (Option.value url ~default)
-                (Option.value origin  ~default));
+        let default = "unknown" in
+        printf "Unhandled message %s from: %s (%s)\n"
+            (JSON.stringify msg)
+            (Option.value url ~default)
+            (Option.value origin  ~default);
         Lwt.return None
 
 let run_tests () =

@@ -1,6 +1,6 @@
 open Core_types
 
-let send_message ?extension_id msg ?options () =
+let send_message ?extension_id msg ?options () : Ojs.t option Lwt.t =
     wrap_callback (Chrome_runtime.send_message ?extension_id msg ?options)
 
 let send_message'
@@ -8,9 +8,9 @@ let send_message'
     (msg : < of_js : Ojs.t -> 'a; to_js : Ojs.t >)
     ?options
     ()
-    : 'a Lwt.t =
+    : 'a option Lwt.t =
     send_message ?extension_id msg#to_js ?options ()
-    |> Lwt.map msg#of_js
+    |> Lwt.map (Option.map msg#of_js)
 
 module Message_event = struct
     let add_listener handler =
