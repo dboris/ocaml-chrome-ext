@@ -20,6 +20,10 @@ let remove tabs : unit Lwt.t =
     let%lwt _ = wrap_callback (Chrome_tabs.remove tabs) in
     Lwt.return ()
 
+let reload ?tab_id ?options () : unit Lwt.t =
+    let%lwt _ = wrap_callback (Chrome_tabs.reload ?tab_id ?options) in
+    Lwt.return ()
+
 let detect_language ?tab_id () : string Lwt.t =
     wrap_callback (Chrome_tabs.detect_language ?tab_id)
 
