@@ -163,6 +163,21 @@ val update :
     unit
 [@@js.global "chrome.tabs.update"]
 
+(* Reload tab *)
+
+type reload_opts
+
+val reload_opts : ?bypassCache:bool -> unit -> reload_opts
+[@@js.builder]
+
+val reload :
+    ?tab_id:Tab.id ->
+    ?options:reload_opts ->
+    ?callback:(Ojs.t option callback_arg -> unit) ->
+    unit ->
+    unit
+[@@js.global "chrome.tabs.reload"]
+
 (* Detect language *)
 
 val detect_language :
