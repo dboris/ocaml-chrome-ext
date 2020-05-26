@@ -42,37 +42,40 @@ let test_tabs_create wrapper =
 
 let test_storage_clear_and_get_all wrapper =
     Lwt.async @@ fun () ->
-        let open Storage_lwt.Local in
-        let item = ["x", Ojs.int_to_js 42]
-        and expected = []
-        in
-        let%lwt () = set item
-        and () = clear ()
-        and actual = get_all ()
-        in
+        let module S = Storage_lwt.Local in
+        let expected = [] in
+        let%lwt () = S.set_key "x" (Ojs.int_to_js 42) in
+        let%lwt () = S.clear () in
+        let%lwt actual = S.get_all () in
         wrapper (fun () -> assert_equal actual expected);
         Lwt.return ()
 
 let test_storage_set_and_get wrapper =
+    let expected = Ojs.int_to_js 42
+    and key = "x" in
     Lwt.async @@ fun () ->
-        let expected = ["x", Ojs.int_to_js 42] in
-        let%lwt () = Storage_lwt.Local.set expected
-        and actual = Storage_lwt.Local.get_key "x"
+        let module S = Storage_lwt.Local in
+        let%lwt () = S.set_key key expected in
+        let%lwt actual = S.get_key key
         in
-        wrapper (fun () -> assert_equal actual expected);
+        wrapper (fun () ->
+            match actual with
+            | Some actual -> assert_equal actual expected
+            | None -> test_fail ());
         Lwt.return ()
 
 let test_storage_get_with_defaults wrapper =
+    let x = Ojs.int_to_js 42
+    and y = Ojs.string_to_js "hi"
+    and compare_keys i1 i2 =
+        String.compare (fst i1) (fst i2)
+    in
     Lwt.async @@ fun () ->
-        let x = Ojs.int_to_js 42
-        and y = Ojs.string_to_js "hi"
-        and compare_keys i1 i2 =
-            String.compare (fst i1) (fst i2)
-        in
-        let%lwt () = Storage_lwt.Local.clear ()
-        and () = Storage_lwt.Local.set ["x", x]
-        and actual =
-            Storage_lwt.Local.get_with_defaults ["x", Ojs.int_to_js 1; "y", y]
+        let module S = Storage_lwt.Local in
+        let%lwt () = S.clear () in
+        let%lwt () = S.set_key "x" x in
+        let%lwt actual =
+            S.get_with_defaults ["x", Ojs.int_to_js 1; "y", y]
         in
         let expected = ["x", x; "y", y]
         and actual_sorted = List.sort compare_keys actual
@@ -82,15 +85,15 @@ let test_storage_get_with_defaults wrapper =
 
 let test_storage_remove wrapper =
     Lwt.async @@ fun () ->
-        let open Storage_lwt.Local in
-        let item = ["x", Ojs.int_to_js 42]
+        let module S = Storage_lwt.Local in
+        let item = Ojs.int_to_js 42
+        and key = "x"
         and expected = []
         in
-        let%lwt () = clear ()
-        and () = set item
-        and () = remove_key "x"
-        and actual = get_all ()
-        in
+        let%lwt () = S.clear () in
+        let%lwt () = S.set_key key item in
+        let%lwt () = S.remove_key key in
+        let%lwt actual = S.get_all () in
         wrapper (fun () -> assert_equal actual expected);
         Lwt.return ()
 

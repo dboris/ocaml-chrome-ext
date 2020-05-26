@@ -10,7 +10,7 @@
 
 (package
   (name chrome_ext)
-  (synopsis "OCaml bindings to the Chrome browser extensions JavaScript API")
+  (synopsis "Chrome browser extensions API bindings")
   (description "Partial bindings to the Chrome browser extensions JavaScript API implemented via gen_js_api.")
   (depends
     (js_of_ocaml (> 3.4.0))

@@ -2,8 +2,11 @@ open Core_types
 open Chrome_storage
 
 module Sync = struct
-    let get_key key : Ojs.t Dict.t Lwt.t =
-        wrap_required_callback (Sync.get_key key)
+    let get_key key : Ojs.t option Lwt.t =
+        let%lwt result = wrap_required_callback (Sync.get_key key) in
+        Lwt.return (
+            if Int.equal (List.length result) 0 then None
+            else Some (snd (List.hd result)))
 
     let get_keys keys : Ojs.t Dict.t Lwt.t =
         wrap_required_callback (Sync.get_keys keys)
@@ -14,7 +17,11 @@ module Sync = struct
     let get_with_defaults dict : Ojs.t Dict.t Lwt.t =
         wrap_required_callback (Sync.get_with_defaults dict)
 
-    let set keys : unit Lwt.t =
+    let set_key key value : unit Lwt.t =
+        let%lwt _ = wrap_callback (Sync.set [key, value]) in
+        Lwt.return ()
+
+    let set_keys keys : unit Lwt.t =
         let%lwt _ = wrap_callback (Sync.set keys) in
         Lwt.return ()
 
@@ -32,8 +39,11 @@ module Sync = struct
 end
 
 module Local = struct
-    let get_key key : Ojs.t Dict.t Lwt.t =
-        wrap_required_callback (Local.get_key key)
+    let get_key key : Ojs.t option Lwt.t =
+        let%lwt result = wrap_required_callback (Local.get_key key) in
+        Lwt.return (
+            if Int.equal (List.length result) 0 then None
+            else Some (snd (List.hd result)))
 
     let get_keys keys : Ojs.t Dict.t Lwt.t =
         wrap_required_callback (Local.get_keys keys)
@@ -44,7 +54,11 @@ module Local = struct
     let get_with_defaults dict : Ojs.t Dict.t Lwt.t =
         wrap_required_callback (Local.get_with_defaults dict)
 
-    let set keys : unit Lwt.t =
+    let set_key key value : unit Lwt.t =
+        let%lwt _ = wrap_callback (Local.set [key, value]) in
+        Lwt.return ()
+
+    let set_keys keys : unit Lwt.t =
         let%lwt _ = wrap_callback (Local.set keys) in
         Lwt.return ()
 

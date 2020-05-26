@@ -1,8 +1,18 @@
-BUILD=_build/default
+BUILD=_build/default/test
+DIST_DIR=dist
+SHELL=/bin/zsh
 
-.PHONY: all release build dist debug clean
+.PHONY: all dev watch test release build buildwatch dist debug clean
 
 all: release dist
+
+dev: buildwatch dist
+
+watch: dist
+	fswatch -0 -v $(BUILD)/*.{html,css,js}(N) | xargs -0 -n 1 -I {} cp -f '{}' $(DIST_DIR)
+
+test: dist
+	web-ext run --target chromium --source-dir $(DIST_DIR)
 
 release:
 	dune build --profile release @default
@@ -10,12 +20,15 @@ release:
 build:
 	dune build @default
 
+buildwatch:
+	dune build --watch --profile release @default
+
 dist:
 	mkdir -p dist
-	cp -f $(BUILD)/test/*.{js,json,html} dist/ 2>/dev/null || true
+	cp -f $(BUILD)/*.{js,json,html}(N) $(DIST_DIR)
 
 debug: build dist
-	cp -f $(BUILD)/test/*.ml dist/ 2>/dev/null || true
+	cp -f $(BUILD)/*.ml $(DIST_DIR)
 
 clean:
 	dune clean
