@@ -1,76 +1,64 @@
 open Core_types
-open Chrome_storage
 
-module Sync = struct
+module type T = sig
+    val get_key : Chrome_storage.key -> Ojs.t option Lwt.t
+    val get_keys : Chrome_storage.key list -> Ojs.t Dict.t Lwt.t
+    val get_all : unit -> Ojs.t Dict.t Lwt.t
+    val get_with_defaults : Ojs.t Dict.t -> Ojs.t Dict.t Lwt.t
+    val set_key : string -> Ojs.t -> unit Lwt.t
+    val set_keys : Ojs.t Dict.t -> unit Lwt.t
+    val remove_key : Chrome_storage.key -> unit Lwt.t
+    val remove_keys : Chrome_storage.key list -> unit Lwt.t
+    val clear : unit -> unit Lwt.t
+end
+
+module type S = sig
+    val get_key : Chrome_storage.key -> callback:(Ojs.t Dict.t callback_arg -> unit) -> unit
+    val get_keys : Chrome_storage.key list -> callback:(Ojs.t Dict.t callback_arg -> unit) -> unit
+    val get_all : callback:(Ojs.t Dict.t callback_arg -> unit) -> unit
+    val get_with_defaults : Ojs.t Dict.t -> callback:(Ojs.t Dict.t callback_arg -> unit) -> unit
+    val set : Ojs.t Dict.t -> ?callback:(Ojs.t option callback_arg -> unit) -> unit -> unit
+    val remove_key : Chrome_storage.key -> ?callback:(Ojs.t option callback_arg -> unit) -> unit -> unit
+    val remove_keys : Chrome_storage.key list -> ?callback:(Ojs.t option callback_arg -> unit) -> unit -> unit
+    val clear : ?callback:(Ojs.t option callback_arg -> unit) -> unit -> unit
+end
+
+module Make_lwt_storage (S : S) : T = struct
     let get_key key : Ojs.t option Lwt.t =
-        let%lwt result = wrap_required_callback (Sync.get_key key) in
+        let%lwt result = wrap_required_callback (S.get_key key) in
         Lwt.return (
             if Int.equal (List.length result) 0 then None
             else Some (snd (List.hd result)))
 
     let get_keys keys : Ojs.t Dict.t Lwt.t =
-        wrap_required_callback (Sync.get_keys keys)
+        wrap_required_callback (S.get_keys keys)
 
     let get_all () : Ojs.t Dict.t Lwt.t =
-        wrap_required_callback (Sync.get_all)
+        wrap_required_callback (S.get_all)
 
     let get_with_defaults dict : Ojs.t Dict.t Lwt.t =
-        wrap_required_callback (Sync.get_with_defaults dict)
+        wrap_required_callback (S.get_with_defaults dict)
 
     let set_key key value : unit Lwt.t =
-        let%lwt _ = wrap_callback (Sync.set [key, value]) in
+        let%lwt _ = wrap_callback (S.set [key, value]) in
         Lwt.return ()
 
     let set_keys keys : unit Lwt.t =
-        let%lwt _ = wrap_callback (Sync.set keys) in
+        let%lwt _ = wrap_callback (S.set keys) in
         Lwt.return ()
 
     let remove_key key : unit Lwt.t =
-        let%lwt _ = wrap_callback (Sync.remove_key key) in
+        let%lwt _ = wrap_callback (S.remove_key key) in
         Lwt.return ()
 
     let remove_keys keys : unit Lwt.t =
-        let%lwt _ = wrap_callback (Sync.remove_keys keys) in
+        let%lwt _ = wrap_callback (S.remove_keys keys) in
         Lwt.return ()
 
     let clear () : unit Lwt.t =
-        let%lwt _ = wrap_callback (Sync.clear) in
+        let%lwt _ = wrap_callback (S.clear) in
         Lwt.return ()
 end
 
-module Local = struct
-    let get_key key : Ojs.t option Lwt.t =
-        let%lwt result = wrap_required_callback (Local.get_key key) in
-        Lwt.return (
-            if Int.equal (List.length result) 0 then None
-            else Some (snd (List.hd result)))
-
-    let get_keys keys : Ojs.t Dict.t Lwt.t =
-        wrap_required_callback (Local.get_keys keys)
-
-    let get_all () : Ojs.t Dict.t Lwt.t =
-        wrap_required_callback (Local.get_all)
-
-    let get_with_defaults dict : Ojs.t Dict.t Lwt.t =
-        wrap_required_callback (Local.get_with_defaults dict)
-
-    let set_key key value : unit Lwt.t =
-        let%lwt _ = wrap_callback (Local.set [key, value]) in
-        Lwt.return ()
-
-    let set_keys keys : unit Lwt.t =
-        let%lwt _ = wrap_callback (Local.set keys) in
-        Lwt.return ()
-
-    let remove_key key : unit Lwt.t =
-        let%lwt _ = wrap_callback (Local.remove_key key) in
-        Lwt.return ()
-
-    let remove_keys keys : unit Lwt.t =
-        let%lwt _ = wrap_callback (Local.remove_keys keys) in
-        Lwt.return ()
-
-    let clear () : unit Lwt.t =
-        let%lwt _ = wrap_callback (Local.clear) in
-        Lwt.return ()
-end
+module Sync = Make_lwt_storage (Chrome_storage.Sync)
+module Local = Make_lwt_storage (Chrome_storage.Local)
