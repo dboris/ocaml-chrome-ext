@@ -21,7 +21,7 @@ val create_opts :
 [@@js.builder]
 
 val create :
-    create_opts ->
+    ?options:create_opts ->
     ?callback:(Window.t callback_arg -> unit) ->
     unit ->
     unit
