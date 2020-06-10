@@ -11,3 +11,6 @@ module Storage_lwt = Chrome_storage_lwt
 
 module Context_menus = Chrome_context_menus
 module Context_menus_lwt = Chrome_context_menus_lwt
+
+module Windows = Chrome_windows
+module Windows_lwt = Chrome_windows_lwt

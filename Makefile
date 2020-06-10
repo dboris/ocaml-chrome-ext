@@ -2,8 +2,6 @@ BUILD=_build/default/test
 DIST_DIR=dist
 SHELL=/bin/zsh
 
-.PHONY: all dev watch test release build buildwatch dist debug clean
-
 all: release dist
 
 dev: buildwatch dist
@@ -33,3 +31,5 @@ debug: build dist
 clean:
 	dune clean
 	rm -Rf dist
+
+.PHONY: all dev watch test release build buildwatch dist debug clean
