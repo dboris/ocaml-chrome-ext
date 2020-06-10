@@ -159,7 +159,8 @@ val update_opts :
 val update :
     Tab.id ->
     update_opts ->
-    callback:(Tab.t callback_arg -> unit) ->
+    ?callback:(Tab.t callback_arg -> unit) ->
+    unit ->
     unit
 [@@js.global "chrome.tabs.update"]
 

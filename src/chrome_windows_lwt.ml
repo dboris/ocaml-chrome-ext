@@ -7,3 +7,6 @@ let create ?options () : Window.t Lwt.t =
 let remove id : unit Lwt.t =
     wrap_callback (Chrome_windows.remove id)
     >|= ignore
+
+let update id options : Window.t Lwt.t =
+    wrap_callback (Chrome_windows.update id options)

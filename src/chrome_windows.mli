@@ -35,3 +35,41 @@ val remove :
     unit ->
     unit
 [@@js.global "chrome.windows.remove"]
+
+(* Update window *)
+
+type update_opts
+
+val update_opts :
+    ?drawAttention:bool ->
+    ?focused:bool ->
+    ?height:int ->
+    ?left:int ->
+    ?state:Window.state ->
+    ?top:int ->
+    ?width:int ->
+    unit ->
+    update_opts
+[@@js.builder]
+
+val update :
+    Window.id ->
+    update_opts ->
+    ?callback:(Window.t callback_arg -> unit) ->
+    unit ->
+    unit
+[@@js.global "chrome.windows.update"]
+
+(* Events *)
+
+type on_removed_listener = Window.id -> unit
+
+(** Fired when a window is removed. *)
+type on_removed_event =
+  { add_listener : on_removed_listener -> unit
+  ; remove_listener : on_removed_listener -> unit
+  ; has_listener : on_removed_listener -> bool
+  }
+
+val on_removed : on_removed_event
+[@@js.global "chrome.windows.onRemoved"]
