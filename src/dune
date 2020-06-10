@@ -34,3 +34,8 @@
   (targets chrome_context_menus.ml)
   (deps chrome_context_menus.mli)
   (action (run %{bin:gen_js_api} %{deps})))
+
+(rule
+  (targets chrome_windows.ml)
+  (deps chrome_windows.mli)
+  (action (run %{bin:gen_js_api} %{deps})))

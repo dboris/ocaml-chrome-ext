@@ -23,7 +23,7 @@ module type STORAGE = sig
     val clear : ?callback:(Ojs.t option callback_arg -> unit) -> unit -> unit
 end
 
-module Make_lwt_storage (S : STORAGE) : STORAGE_LWT = struct
+module Make_Lwt_Storage (S : STORAGE) : STORAGE_LWT = struct
     let get_key key : Ojs.t option Lwt.t =
         let%lwt result = wrap_required_callback (S.get_key key) in
         Lwt.return (
@@ -60,5 +60,5 @@ module Make_lwt_storage (S : STORAGE) : STORAGE_LWT = struct
         Lwt.return ()
 end
 
-module Sync = Make_lwt_storage (Chrome_storage.Sync)
-module Local = Make_lwt_storage (Chrome_storage.Local)
+module Sync = Make_Lwt_Storage (Chrome_storage.Sync)
+module Local = Make_Lwt_Storage (Chrome_storage.Local)
