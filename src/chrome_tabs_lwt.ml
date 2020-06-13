@@ -1,7 +1,7 @@
 open Lwt.Infix
 open Core_types
 
-let send_message ~tab_id msg ?options () : Ojs.t option Lwt.t =
+let send_message ~tab_id msg ?options () : Ojs.t Lwt.t =
     wrap_callback (Chrome_tabs.send_message ~tab_id msg ?options)
 
 let execute_script ?tab_id options : Ojs.t list Lwt.t =

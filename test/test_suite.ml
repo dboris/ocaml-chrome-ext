@@ -129,9 +129,7 @@ let test_tabs_send_message wrapper =
         let%lwt actual =
             Tabs_lwt.send_message ~tab_id (Ojs.string_to_js "hola") ()
         in
-        actual
-        |> Option.iter (fun actual ->
-            wrapper (fun () -> assert_equal (Ojs.string_of_js actual) expected));
+        wrapper (fun () -> assert_equal (Ojs.string_of_js actual) expected);
         Lwt.return ()
 
 let suite =
