@@ -8,6 +8,7 @@
   (preprocess
     (pps
       gen_js_api.ppx
+      js_of_ocaml-ppx
       lwt_ppx)))
 
 (rule
