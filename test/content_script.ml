@@ -4,7 +4,7 @@ let message_handler msg Runtime.{url; _} =
     url |> Option.iter (Printf.printf "Received message from %s\n");
     let result =
         Ojs.string_to_js (String.uppercase_ascii (Ojs.string_of_js msg)) in
-    Lwt.return (Some result)
+    Lwt.return result
 
 let () =
     Runtime_lwt.Message_event.add_listener message_handler;

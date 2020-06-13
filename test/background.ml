@@ -21,10 +21,10 @@ let handle_test_suite_message msg =
     let open Message.Test_suite_to_background in
     match t_of_js msg with
     | Increment n ->
-        Lwt.return (Some (to_increment_result (n + 1)))
+        Lwt.return (to_increment_result (n + 1))
     | Init ->
         print_endline "Content script sent Init message.";
-        Lwt.return None
+        Lwt.return Ojs.null
 
 let handle_message msg Runtime.{url; origin; _} =
     match sender_of_message_url url with
@@ -37,7 +37,7 @@ let handle_message msg Runtime.{url; origin; _} =
             (JSON.stringify msg)
             (Option.value url ~default)
             (Option.value origin  ~default);
-        Lwt.return None
+        Lwt.return Ojs.null
 
 let run_tests () =
     Lwt.async (fun () ->
