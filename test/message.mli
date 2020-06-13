@@ -15,8 +15,7 @@ module Test_suite_to_background : sig
             let%lwt res =
                 Runtime_lwt.send_message (t_to_js (Increment n)) ()
             in
-            assert (Option.is_some res);
-            Lwt.return (Ojs.int_of_js (Option.get res))
+            Lwt.return (Ojs.int_of_js res)
     ]
 
     val to_increment_result : int -> Ojs.t

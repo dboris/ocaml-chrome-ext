@@ -16,7 +16,7 @@ val send_message :
     ?extension_id:extension_id ->
     Ojs.t ->
     ?options:send_message_opts ->
-    ?callback:(Ojs.t option callback_arg -> unit) ->
+    ?callback:(Ojs.t callback_arg -> unit) ->
     unit ->
     unit
 [@@js.global "chrome.runtime.sendMessage"]
