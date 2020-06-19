@@ -10,3 +10,6 @@ let remove id : unit Lwt.t =
 
 let update id options : Window.t Lwt.t =
     wrap_callback (Chrome_windows.update id options)
+
+let get id ?options () : Window.t Lwt.t =
+    wrap_callback (Chrome_windows.get id ?options)

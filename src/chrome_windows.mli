@@ -60,6 +60,25 @@ val update :
     unit
 [@@js.global "chrome.windows.update"]
 
+(* Get window *)
+
+type get_opts
+
+val get_opts :
+    ?populate:bool ->
+    ?windowTypes:Window.type_ list ->
+    unit ->
+    get_opts
+[@@js.builder]
+
+val get :
+    Window.id ->
+    ?options:get_opts ->
+    ?callback:(Window.t callback_arg -> unit) ->
+    unit ->
+    unit
+[@@js.global "chrome.windows.get"]
+
 (* Events *)
 
 type on_removed_listener = Window.id -> unit
