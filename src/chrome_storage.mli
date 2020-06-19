@@ -63,3 +63,27 @@ module Local : sig
     val clear : ?callback:(Ojs.t option callback_arg -> unit) -> unit -> unit
     [@@js.global "chrome.storage.local.clear"]
 end
+
+(* Events *)
+
+type area_name =
+  | Local [@js "local"]
+  | Sync [@js "sync"]
+[@@js.enum]
+
+type storage_change =
+  { oldValue : Ojs.t option
+  ; newValue : Ojs.t option
+  }
+
+type on_changed_listener = storage_change Dict.t -> area_name -> unit
+
+(** Fired when one or more items change. *)
+type on_changed_event =
+  { add_listener : on_changed_listener -> unit
+  ; remove_listener : on_changed_listener -> unit
+  ; has_listener : on_changed_listener -> bool
+  }
+
+val on_changed : on_changed_event
+[@@js.global "chrome.storage.onChanged"]
