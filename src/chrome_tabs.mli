@@ -223,3 +223,20 @@ type on_updated_event =
 
 val on_updated : on_updated_event
 [@@js.global "chrome.tabs.onUpdated"]
+
+type remove_info =
+  { isWindowClosing : bool
+  ; windowId : Window.id
+  }
+
+type on_removed_listener = Tab.id -> remove_info -> unit
+
+(** Fired when a tab is closed. *)
+type on_removed_event =
+  { add_listener : on_removed_listener -> unit
+  ; remove_listener : on_removed_listener -> unit
+  ; has_listener : on_removed_listener -> bool
+  }
+
+val on_removed : on_removed_event
+[@@js.global "chrome.tabs.onRemoved"]
