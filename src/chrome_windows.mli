@@ -74,10 +74,26 @@ val get_opts :
 val get :
     Window.id ->
     ?options:get_opts ->
-    ?callback:(Window.t callback_arg -> unit) ->
-    unit ->
+    callback:(Window.t callback_arg -> unit) ->
     unit
 [@@js.global "chrome.windows.get"]
+
+(** Gets the current window. The current window is the window
+    that contains the code that is currently executing.
+    This can be different from the topmost or focused window. *)
+val get_current :
+    ?options:get_opts ->
+    callback:(Window.t callback_arg -> unit) ->
+    unit
+[@@js.global "chrome.windows.getCurrent"]
+
+(** Gets the window that was most recently focused —
+    typically the window 'on top'. *)
+val get_last_focused :
+    ?options:get_opts ->
+    callback:(Window.t callback_arg -> unit) ->
+    unit
+[@@js.global "chrome.windows.getLastFocused"]
 
 (* Events *)
 
