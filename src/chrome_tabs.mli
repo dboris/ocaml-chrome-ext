@@ -188,6 +188,16 @@ val detect_language :
     unit
 [@@js.global "chrome.tabs.detectLanguage"]
 
+(* Set zoom *)
+
+val set_zoom :
+    ?tab_id:Tab.id ->
+    float ->
+    ?callback:(Ojs.t option callback_arg -> unit) ->
+    unit ->
+    unit
+[@@js.global "chrome.tabs.setZoom"]
+
 (* Events *)
 
 type change_info =

@@ -30,3 +30,7 @@ let detect_language ?tab_id () : string Lwt.t =
 
 let update tab_id options : Tab.t Lwt.t =
     wrap_callback (Chrome_tabs.update tab_id options)
+
+let set_zoom ?tab_id zoom_factor : unit Lwt.t =
+    wrap_callback (Chrome_tabs.set_zoom ?tab_id zoom_factor)
+    >|= ignore
