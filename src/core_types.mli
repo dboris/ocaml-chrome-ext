@@ -96,49 +96,6 @@ type extension_id = string
 
 val extension_id_to_js : extension_id -> Ojs.t
 
-module Window : sig
-    type id = int
-
-    val id_of_js : Ojs.t -> id
-    val id_to_js : id -> Ojs.t
-
-    type type_ =
-      | Normal [@js "normal"]
-      | Popup [@js "popup"]
-    [@@js.enum]
-
-    val type__of_js : Ojs.t -> type_
-    val type__to_js : type_ -> Ojs.t
-
-    type state =
-      | Normal [@js "normal"]
-      | Minimized [@js "minimized"]
-      | Maximized [@js "maximized"]
-      | Fullscreen [@js "fullscreen"]
-    [@@js.enum]
-
-    val state_of_js : Ojs.t -> state
-    val state_to_js : state -> Ojs.t
-
-    type t =
-      { alwaysOnTop : bool
-      ; focused : bool
-      ; height : int option
-      ; id : id option
-      ; incognito : bool
-      ; left : int option
-      ; sessionId : string option
-      ; state : state option
-      (* ; tabs : Tab.id list option *)
-      ; top : int option
-      ; type_ : type_ option
-      ; width : int option
-      }
-
-    val t_of_js : Ojs.t -> t
-    val t_to_js : t -> Ojs.t
-end
-
 module Tab : sig
     type id = int
 
@@ -188,7 +145,50 @@ module Tab : sig
       ; title : string option
       ; url : string option
       ; width : int option
-      ; windowId : Window.id
+      (* ; windowId : Window.id *)
+      }
+
+    val t_of_js : Ojs.t -> t
+    val t_to_js : t -> Ojs.t
+end
+
+module Window : sig
+    type id = int
+
+    val id_of_js : Ojs.t -> id
+    val id_to_js : id -> Ojs.t
+
+    type type_ =
+      | Normal [@js "normal"]
+      | Popup [@js "popup"]
+    [@@js.enum]
+
+    val type__of_js : Ojs.t -> type_
+    val type__to_js : type_ -> Ojs.t
+
+    type state =
+      | Normal [@js "normal"]
+      | Minimized [@js "minimized"]
+      | Maximized [@js "maximized"]
+      | Fullscreen [@js "fullscreen"]
+    [@@js.enum]
+
+    val state_of_js : Ojs.t -> state
+    val state_to_js : state -> Ojs.t
+
+    type t =
+      { alwaysOnTop : bool
+      ; focused : bool
+      ; height : int option
+      ; id : id option
+      ; incognito : bool
+      ; left : int option
+      ; sessionId : string option
+      ; state : state option
+      ; tabs : Tab.id list option
+      ; top : int option
+      ; type_ : type_ option
+      ; width : int option
       }
 
     val t_of_js : Ojs.t -> t
