@@ -1,5 +1,3 @@
-open Chrome_ext
-
 module Test_suite_to_background : sig
     type t =
       | Increment of int  (* -> int *)
@@ -13,7 +11,7 @@ module Test_suite_to_background : sig
     [@@js.custom
         let increment n =
             let%lwt res =
-                Runtime_lwt.send_message (t_to_js (Increment n)) ()
+                Chrome_ext.Runtime_lwt.send_message (t_to_js (Increment n)) ()
             in
             Lwt.return (Ojs.int_of_js res)
     ]

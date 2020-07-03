@@ -40,3 +40,8 @@
   (targets chrome_windows.ml)
   (deps chrome_windows.mli)
   (action (run %{bin:gen_js_api} %{deps})))
+
+(rule
+  (targets chrome_tts.ml)
+  (deps chrome_tts.mli)
+  (action (run %{bin:gen_js_api} %{deps})))

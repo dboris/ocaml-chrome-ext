@@ -16,3 +16,5 @@ module Windows = Chrome_windows
 module Windows_lwt = Chrome_windows_lwt
 
 module Runtime_jsoo = Chrome_runtime_jsoo
+
+module Tts = Chrome_tts
