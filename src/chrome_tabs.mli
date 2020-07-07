@@ -1,5 +1,14 @@
 open Core_types
 
+(* Get *)
+
+val get :
+    Tab.id ->
+    ?callback:(Tab.t callback_arg -> unit) ->
+    unit ->
+    unit
+[@@js.global "chrome.tabs.get"]
+
 (* Send message *)
 
 type send_message_opts

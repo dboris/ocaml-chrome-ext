@@ -1,6 +1,12 @@
 open Lwt.Infix
 open Core_types
 
+let get tab_id : Tab.t Lwt.t =
+    wrap_callback (Chrome_tabs.get tab_id)
+
+let update tab_id options : Tab.t Lwt.t =
+    wrap_callback (Chrome_tabs.update tab_id options)
+
 let send_message ~tab_id msg ?options () : Ojs.t Lwt.t =
     wrap_callback (Chrome_tabs.send_message ~tab_id msg ?options)
 
@@ -27,9 +33,6 @@ let reload ?tab_id ?options () : unit Lwt.t =
 
 let detect_language ?tab_id () : string Lwt.t =
     wrap_callback (Chrome_tabs.detect_language ?tab_id)
-
-let update tab_id options : Tab.t Lwt.t =
-    wrap_callback (Chrome_tabs.update tab_id options)
 
 let set_zoom ?tab_id zoom_factor : unit Lwt.t =
     wrap_callback (Chrome_tabs.set_zoom ?tab_id zoom_factor)
