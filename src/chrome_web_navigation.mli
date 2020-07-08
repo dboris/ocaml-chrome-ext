@@ -23,7 +23,7 @@ val get_frame :
 
 type get_all_frames_opts
 
-val get_all_frames_opts : ?tabId:Tab.id -> unit -> get_all_frames_opts
+val get_all_frames_opts : tabId:Tab.id -> get_all_frames_opts
 [@@js.builder]
 
 type frame_info =
