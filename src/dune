@@ -45,3 +45,8 @@
   (targets chrome_tts.ml)
   (deps chrome_tts.mli)
   (action (run %{bin:gen_js_api} %{deps})))
+
+(rule
+  (targets chrome_web_navigation.ml)
+  (deps chrome_web_navigation.mli)
+  (action (run %{bin:gen_js_api} %{deps})))
