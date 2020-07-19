@@ -8,8 +8,11 @@ let message_handler msg Runtime.{url; _} =
 
 let () =
     Runtime_lwt.Message_event.add_listener message_handler;
+    let msg = Message.Test_suite_to_background.(t_to_js Init) in
+    let port =
+        Runtime.connect ~options:(Runtime.connect_opts ~name:"cs" ()) () in
+    port.postMessage msg;
     Lwt.async (fun () ->
-        let msg = Message.Test_suite_to_background.(t_to_js Init) in
         let%lwt _ = Runtime_lwt.send_message msg () in
         Lwt.return ());
     print_endline "content script was run"

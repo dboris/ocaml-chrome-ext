@@ -69,9 +69,19 @@ let on_installed_listener Runtime.{reason; _} =
         Lwt.async setup_context_menus
     | _ -> ()
 
+let cs_port_listener msg port =
+    Js_of_ocaml.(Firebug.console##log_2 (Js.string "Received on port") msg)
+
+let on_connect_listener (Runtime.Port.{name; _} as port) =
+    match name with
+    | "cs" ->
+        port.onMessage.add_listener cs_port_listener
+    | _ -> ()
+
 let () =
     Runtime_lwt.Message_event.add_listener handle_message;
     Runtime.on_installed.add_listener on_installed_listener;
+    Runtime.on_connect.add_listener on_connect_listener;
     print_endline "Running tests...";
     Lwt.async @@ fun () ->
         let%lwt () = Lwt_js.sleep 3.
